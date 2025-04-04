@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -43,13 +44,47 @@ import vn.iotstar.R;
 public class MainActivity extends AppCompatActivity {
 
     Button btnChoose, btnUpload;
-    ImageView imageViewChoose, imageViewUpload;
-    EditText editTextUserName;
-    TextView textViewUsername;
+    ImageView imageViewChoose;
     private Uri mUri;
     private ProgressDialog mProgressDialog;
     public static final int MY_REQUEST_CODE = 100;
     public static final String TAG = MainActivity.class.getName();
+
+    public static String[] storge_permissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static String[] storge_permissions_33 = {
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO
+    };
+
+    private ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    Log.e(TAG, "onActivityResult");
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data == null) {
+                            return;
+                        }
+                        Uri uri = data.getData();
+                        mUri = uri;
+                        try {
+                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                            imageViewChoose.setImageBitmap(bitmap);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +111,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private String[] permissions() {
+        String[] p;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            p = storge_permissions_33;
+        } else {
+            p = storge_permissions;
+        }
+        return p;
+    }
+
     private void CheckPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             openGallery();
@@ -85,14 +130,13 @@ public class MainActivity extends AppCompatActivity {
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             openGallery();
         } else {
-            ActivityCompat.requestPermissions(this, permissions(), MY_REQUEST_CODE);
+            requestPermissions(permissions(), MY_REQUEST_CODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == MY_REQUEST_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
         }
@@ -105,57 +149,15 @@ public class MainActivity extends AppCompatActivity {
         mActivityResultLauncher.launch(Intent.createChooser(intent, "Select Picture"));
     }
 
-    private String[] permissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return new String[]{Manifest.permission.READ_MEDIA_IMAGES};
-        } else {
-            return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-        }
-    }
-
-    private final ActivityResultLauncher<Intent> mActivityResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                Log.e(TAG, "onActivityResult");
-
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent data = result.getData();
-                    if (data == null) {
-                        return;
-                    }
-
-                    Uri uri = data.getData();
-                    mUri = uri;
-
-                    Log.e(TAG, "Received URI: " + uri.toString());
-                    String path = RealPathUtil.getRealPath(this, uri);
-                    Log.e(TAG, "Real file path: " + path);
-
-                    try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                        imageViewChoose.setImageBitmap(bitmap);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-    );
 
     private void AnhXa() {
         btnChoose = findViewById(R.id.btnChoose);
         btnUpload = findViewById(R.id.btnUpload);
-        imageViewUpload = findViewById(R.id.imgMultipart);
-        editTextUserName = findViewById(R.id.editUserName);
-        textViewUsername = findViewById(R.id.tvUsername);
-        imageViewChoose = findViewById(R.id.imgChoose);
+        imageViewChoose = findViewById(R.id.imgAvatar);
     }
 
     public void UploadImage1() {
         mProgressDialog.show();
-
-        // Khai báo biến và lấy dữ liệu từ EditText
-        String username = editTextUserName.getText().toString().trim();
-        RequestBody requestUsername = RequestBody.create(MediaType.parse("multipart/form-data"), username);
 
         // Lấy đường dẫn thực của ảnh
         String IMAGE_PATH = RealPathUtil.getRealPath(this, mUri);
@@ -164,29 +166,25 @@ public class MainActivity extends AppCompatActivity {
         if (IMAGE_PATH != null && !IMAGE_PATH.isEmpty()) {
             File file = new File(IMAGE_PATH);
 
-            // Kiểm tra nếu file tồn tại
             if (file.exists()) {
                 RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 MultipartBody.Part partbodyavatar = MultipartBody.Part.createFormData(Const.MY_IMAGES, file.getName(), requestFile);
 
-                // Gọi Retrofit API
-                ServiceAPI.serviceapi.upload(requestUsername, partbodyavatar).enqueue(new Callback<List<ImageUpload>>() {
+                ServiceAPI.serviceapi.upload(partbodyavatar).enqueue(new Callback<List<ImageUpload>>() {
                     @Override
                     public void onResponse(Call<List<ImageUpload>> call, Response<List<ImageUpload>> response) {
                         mProgressDialog.dismiss();
 
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             List<ImageUpload> imageUpload = response.body();
+                            String avatarUrl = imageUpload.get(0).getAvatar(); // Lấy link ảnh từ kết quả
 
-                            for (ImageUpload img : imageUpload) {
-                                textViewUsername.setText(img.getUsername());
+                            // Truyền link ảnh về lại ProfileActivity
+                            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                            intent.putExtra("avatarUrl", avatarUrl);
+                            startActivity(intent);
+                            finish(); // kết thúc MainActivity để quay lại
 
-                                Glide.with(MainActivity.this)
-                                        .load(img.getAvartar())
-                                        .into(imageViewUpload);
-                            }
-
-                            Toast.makeText(MainActivity.this, "Thành công", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(MainActivity.this, "Thất bại", Toast.LENGTH_SHORT).show();
                         }

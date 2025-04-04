@@ -3,32 +3,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
-
-    <EditText
-        android:id="@+id/editUserName"
+    android:background="@color/white">
+    <!-- Header -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="EditText Username"
-        android:padding="8dp"
-        android:background="@android:color/darker_gray"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"/>
+        android:layout_height="56dp"
+        android:background="#E53935"
+        android:gravity="center_vertical"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:backgroundTint="@android:color/white"
+            android:layout_marginEnd="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
 
     <ImageView
-        android:id="@+id/imgChoose"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginTop="10dp"/>
+        android:id="@+id/imgAvatar"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:background="@drawable/circle_background"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_user"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
+        />
 
     <Button
         android:id="@+id/btnChoose"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="CHỌN FILE"
-        android:backgroundTint="@android:color/holo_blue_dark"
+        android:backgroundTint="#E53935"
         android:textColor="@android:color/white"
         android:layout_marginTop="10dp"/>
 
@@ -36,25 +53,10 @@
         android:id="@+id/btnUpload"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:backgroundTint="#E53935"
         android:text="UPLOAD IMAGES"
-        android:backgroundTint="@android:color/holo_blue_dark"
-        android:textColor="@android:color/white"
-        android:layout_marginTop="5dp"/>
+        android:textColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/tvUsername"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView Username"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginTop="10dp"/>
-
-    <ImageView
-        android:id="@+id/imgMultipart"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginTop="10dp"/>
 
 </LinearLayout>

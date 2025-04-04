@@ -2,7 +2,7 @@ package vn.iotstar.UploadFile;
 
 public class ImageUpload {
     private int id;
-    private String username;
+    private String avatar;
 
     public int getId() {
         return id;
@@ -12,21 +12,16 @@ public class ImageUpload {
         this.id = id;
     }
 
-    public String getAvartar() {
-        return avartar;
+    public String getAvatar() {
+        return avatar;
     }
 
-    public void setAvartar(String avartar) {
-        this.avartar = avartar;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
-    public String getUsername() {
-        return username;
+    public ImageUpload(int id, String avatar) {
+        this.id = id;
+        this.avatar = avatar;
     }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    private String avartar;
 }

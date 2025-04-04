@@ -26,16 +26,8 @@ public interface ServiceAPI {
             .create(ServiceAPI.class);
 
     @Multipart
-    @POST("upload.php")
+    @POST("updateimages.php")
     Call<List<ImageUpload>> upload(
-            @Part(Const.MY_USERNAME) RequestBody username,
-            @Part MultipartBody.Part avatar
-    );
-
-    @Multipart
-    @POST("upload1.php")
-    Call<Message> upload1(
-            @Part(Const.MY_USERNAME) RequestBody username,
             @Part MultipartBody.Part avatar
     );
 }
